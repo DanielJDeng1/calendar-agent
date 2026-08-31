@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "incremental": false,
+    "plugins": []
+  },
+  "include": [
+    "lib/domain/**/*.ts",
+    "lib/calendar/**/*.ts",
+    "lib/agent/**/*.ts",
+    "lib/preferences/**/*.ts",
+    "lib/policy/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next"
+  ]
+}

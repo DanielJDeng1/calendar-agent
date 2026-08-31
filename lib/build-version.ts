@@ -1,0 +1,2 @@
+export const CALENDAR_AGENT_VERSION = "3.0.0";
+export const BUILD_VERSION = CALENDAR_AGENT_VERSION;

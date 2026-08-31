@@ -1,0 +1,39 @@
+{
+  "name": "calendar-agent-implementation",
+  "version": "3.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "typecheck": "tsc --noEmit",
+    "test:core": "tsc --noEmit -p tsconfig.core.json",
+    "test:planner-contract": "tsx scripts/test-planner-contract.ts",
+    "clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\"",
+    "dev:clean": "npm run clean && next dev -p 3000",
+    "diagnose:planner": "tsx scripts/diagnose-planner.ts",
+    "diagnose:planner:full": "tsx scripts/diagnose-planner.ts --full",
+    "acceptance:agent": "tsx scripts/acceptance-agent.ts",
+    "test:transport": "tsx scripts/test-openrouter-timeout.ts",
+    "test:calendar-core": "tsx scripts/test-calendar-core.ts",
+    "diagnose:config": "tsx scripts/diagnose-config.ts",
+    "diagnose:provider": "tsx scripts/diagnose-provider.ts",
+    "test:agent-core": "tsx scripts/test-agent-core.ts",
+    "acceptance:agent:full": "tsx scripts/acceptance-agent.ts --full",
+    "test:transport-edge": "tsx scripts/test-openrouter-edge.ts",
+    "verify:local": "npm run test:core && npm run test:transport && npm run test:transport-edge && npm run test:planner-contract && npm run test:calendar-core && npm run test:agent-core"
+  },
+  "dependencies": {
+    "next": "^15.5.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@next/env": "^15.5.0",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.8.0"
+  }
+}
