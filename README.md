@@ -1,74 +1,59 @@
 # Calendar Agent
 
-A Next.js app that converts natural language into structured calendar updates. OpenRouter parses intent into JSON, while scheduling logic and conflict checks run locally in TypeScript.
+A local-first Next.js calendar assistant. OpenRouter interprets natural-language requests into structured commands; TypeScript validates and simulates proposed changes before the user approves them. Calendar data is saved in the browser's local storage.
 
-## Tech Stack
+## Stack
 
-* **Framework:** Next.js (App Router)
-* **Language:** TypeScript
-* **Validation:** Zod
-* **Styling:** Tailwind CSS
-* **LLM Provider:** OpenRouter API
+- Next.js (App Router), React, TypeScript
+- Zod request validation
+- CSS for the interface
+- OpenRouter API for natural-language planning
 
-## Quick Start
+## Set up (Windows PowerShell)
 
-### 1. Install dependencies
+Requires Node.js and npm. From the repository root:
 
 ```powershell
 npm install
-
-```
-
-### 2. Configure environment
-
-```powershell
 Copy-Item .env.example .env.local
-
 ```
 
-Set your OpenRouter credentials in `.env.local`:
-
-```text
-OPENROUTER_API_KEY=your_key_here
-OPENROUTER_MODEL=openrouter/free
-PLANNER_DEBUG=true
-
-```
-
-If you have active PowerShell overrides from a previous session, clear them before starting:
+Edit `.env.local` and set a real `OPENROUTER_API_KEY` and the model you intend to use. Do not commit this file or your key.
 
 ```powershell
-Remove-Item Env:OPENROUTER_MODEL -ErrorAction SilentlyContinue
-Remove-Item Env:OPENROUTER_FALLBACK_MODELS -ErrorAction SilentlyContinue
-Remove-Item Env:OPENROUTER_TIMEOUT_MS -ErrorAction SilentlyContinue
-
+npm run dev
 ```
 
-### 3. Start the app
+Open `http://localhost:3000`.
+
+## Verification
+
+Run checks that do not contact the language-model provider:
 
 ```powershell
-npm run dev:clean
-
-```
-
-Open `http://localhost:3000` in your browser.
-
----
-
-## Testing & Diagnostics
-
-```powershell
-# Unit tests & type checks
 npm run verify:local
+npm run build
+```
 
-# Diagnostic suite
+`verify:local` checks that package scripts reference existing files, type-checks the app and core modules, and runs deterministic calendar validation/simulation smoke tests. The repository has no checked-in dependency lockfile; `npm install` resolves dependency versions locally. Commit a generated lockfile after checking a clean installation if you need reproducible deployments.
+
+The following diagnostics are available:
+
+```powershell
 npm run diagnose:config
 npm run diagnose:provider
 npm run diagnose:planner
-
-# Integration tests
-npm run acceptance:agent
-
 ```
 
-To output raw execution traces and model latency to stdout, keep `PLANNER_DEBUG=true` enabled in `.env.local`.
+The live acceptance harness uses a configured OpenRouter key and makes real provider requests. It is **not** part of `verify:local`:
+
+```powershell
+npm run acceptance:agent
+npm run acceptance:agent:full
+```
+
+Set `PLANNER_DEBUG=true` in `.env.local` to print planner traces during development.
+
+## Current limits
+
+This is a local-first prototype, not a production multi-user calendar backend. The browser supplies calendar state to the API; its snapshot version is not independently checked against a server-owned database. The apply route also uses an in-memory set for best-effort duplicate suppression, which is lost on restart and is not shared between instances. Neither mechanism guarantees conflict-free concurrent edits or durable exactly-once execution. Those guarantees require authoritative persistent state and transactional apply/idempotency handling before a multi-user deployment. Tests verify selected core behaviors, not every possible model response.
