@@ -1,30 +1,17 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
-import { CalendarEvent, DraftState, Preference } from "@/lib/domain/types";
 import { validateCommands } from "@/lib/calendar/validate";
 import { simulateCommands, applyDiff } from "@/lib/calendar/simulate";
 import { requiredApproval } from "@/lib/policy/approval";
+import { applyRequestSchema } from "@/lib/domain/request-schemas";
 
-const applySchema = z.object({
-  events: z.array(z.any()),
-  preferences: z.array(z.any()),
-  snapshotVersion: z.string().min(1),
-  draft: z.any(),
-});
-
+// Best-effort duplicate suppression for a single process, NOT durable idempotency.
+// Multi-instance operation requires an authoritative persistent store and a transaction.
 const executedKeys = new Set<string>();
 
 export async function POST(request: Request) {
   try {
-    const parsed = applySchema.parse(await request.json()) as {
-      events: CalendarEvent[];
-      preferences: Preference[];
-      snapshotVersion: string;
-      draft: DraftState;
-    };
-
-    const { events, preferences, snapshotVersion, draft } = parsed;
-    if (draft.baseSnapshotVersion !== snapshotVersion) {
+    const { events, preferences, snapshotVersion, draft } = applyRequestSchema.parse(await request.json());
+    if (draft.baseSnapshotVersion !== snapshotVersion || draft.commands.some((command) => command.expectedSnapshotVersion !== snapshotVersion)) {
       return NextResponse.json(
         { ok: false, code: "STALE_CALENDAR", message: "The calendar changed after this draft was created." },
         { status: 409 }
